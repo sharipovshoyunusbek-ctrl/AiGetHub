@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aizet AI Hub - Popup AI Platformasi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f9fafb;
+            --gray: #94a3b8;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --neon-glow: 0 0 30px rgba(99, 102, 241, 0.4);
+        }
+
+        body {
+            background: var(--dark);
+            color: white;
+            min-height: 100vh;
+        }
+
+        /* Header - Sizning chiroyli dizayningiz */
+        .header {
+            background: rgba(15, 23, 42, 0.95);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--neon-glow);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #00dbde, #fc00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .user-profile:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            height: calc(100vh - 80px);
+            padding: 1rem;
+            gap: 1rem;
+        }
+
+        /* Sidebar - Sizning chiroyli dizayningiz */
+        .sidebar {
+            width: 280px;
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: var(--shadow);
+        }
+
+        .ai-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .ai-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .ai-item:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateX(5px);
+            border-color: var(--primary);
+        }
+
+        .ai-item.active {
+            background: rgba(99, 102, 241, 0.3);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .ai-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .chatgpt-icon { background: linear-gradient(45deg, #10a37f, #00d084); }
+        .deepseek-icon { background: linear-gradient(45deg, #8b5cf6, #a855f7); }
+        .gemini-icon { background: linear-gradient(45deg, #4285f4, #34a853); }
+        .claude-icon { background: linear-gradient(45deg, #d946ef, #a855f7); }
+
+        /* Dock System - Popup oynalarni boshqarish */
+        .dock-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            border: 1px solid var(--primary);
+            z-index: 999;
+            box-shadow: var(--shadow);
+        }
+
+        .dock-item {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .dock-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .dock-item.active {
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .dock-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Workspace - Popup Preview */
+        .workspace {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 20px;
+            padding: 1rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .popup-preview {
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+        }
+
+        .preview-header {
+            background: var(--gradient);
+            padding: 1rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: #333;
+            text-align: center;
+        }
+
+        .preview-content i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .control-btn {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: 10px;
+            border: none;
+            background: rgba(99, 102, 241, 0.2);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--gradient);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            animation: slideInRight 0.5s ease-out;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Popup Windows Counter */
+        .windows-counter {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            background: rgba(99, 102, 241, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="logo-text">Aizet AI Hub</div>
+        </div>
+        
+        <div class="user-profile" onclick="toggleAuth()">
+            <div class="avatar" id="userAvatar">👤</div>
+            <div>
+                <div id="userName">Mehmon</div>
+                <div style="font-size: 0.8rem; color: var(--gray);" id="userStatus">Kirish kerak</div>
+            </div>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </header>
+
+    <!-- Windows Counter -->
+    <div class="windows-counter" id="windowsCounter">
+        <i class="fas fa-window-maximize"></i>
+        <span id="openWindowsCount">0</span>
+        <span>ochiq oyna</span>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h3 style="margin-bottom: 1.5rem; color: var(--primary);">
+                <i class="fas fa-robot"></i> AI Platformalar
+            </h3>
+            
+            <div class="ai-list" id="aiList">
+                <!-- AI items will be populated -->
+            </div>
+            
+            <div class="control-panel">
+                <h4 style="margin-bottom: 1rem; color: var(--gray);">
+                    <i class="fas fa-sliders-h"></i> Boshqaruv
+                </h4>
+                <button class="control-btn" onclick="openAllAI()">
+                    <i class="fas fa-external-link-alt"></i>
+                    Barchasini ochish
+                </button>
+                <button class="control-btn" onclick="arrangePopups()">
+                    <i class="fas fa-th"></i>
+                    Oynalarni tartiblash
+                </button>
+                <button class="control-btn" onclick="closeAllPopups()">
+                    <i class="fas fa-times-circle"></i>
+                    Barchasini yopish
+                </button>
+                <button class="control-btn" onclick="showPopupManager()">
+                    <i class="fas fa-tasks"></i>
+                    Oynalarni boshqarish
+                </button>
+            </div>
+        </aside>
+
+        <!-- Workspace -->
+        <main class="workspace">
+            <div class="popup-preview" id="popupPreview">
+                <div class="preview-header">
+                    <div style="display: flex; align-items: center; gap: 0.8rem;">
+                        <i class="fas fa-window-restore"></i>
+                        <span>AI Oyna Ko'rinishi</span>
+                    </div>
+                    <div style="font-size: 0.9rem; opacity: 0.8;">
+                        <i class="fas fa-info-circle"></i> Popup oynalar
+                    </div>
+                </div>
+                <div class="preview-content">
+                    <i class="fas fa-external-link-alt"></i>
+                    <h2 style="margin-bottom: 1rem; color: #333;">Popup AI Oynalari</h2>
+                    <p style="color: #666; max-width: 500px; margin-bottom: 2rem;">
+                        Har bir AI alohida popup oynada ochiladi. 
+                        Pastki dock panel orqali barcha ochiq oynalarni boshqarishingiz mumkin.
+                    </p>
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="openDemoPopup()" style="
+                            padding: 0.8rem 1.5rem;
+                            background: var(--primary);
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                        ">
+                            <i class="fas fa-play-circle"></i>
+                            Demo oynani ochish
+                        </button>
+                        <button onclick="openAllAI()" style="
+                            padding: 0.8rem 1.5rem;
+                            background: var(--secondary);
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                        ">
+                            <i class="fas fa-rocket"></i>
+                            Barcha AI'larni ochish
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Dock System -->
+    <div class="dock-container" id="dockContainer">
+        <!-- Dock items will be added here dynamically -->
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification" style="display: none;">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">Xabar</span>
+    </div>
+
+    <script>
+        // AI Platforms Data
+        const aiPlatforms = [
+            {
+                id: 'chatgpt',
+                name: 'ChatGPT',
+                icon: 'fas fa-comment-dots',
+                color: '#10a37f',
+                url: 'https://chat.openai.com',
+                popupSize: {width: 1000, height: 700},
+                position: {left: 100, top: 100},
+                isOpen: false,
+                popup: null
+            },
+            {
+                id: 'deepseek',
+                name: 'DeepSeek',
+                icon: 'fas fa-seedling',
+                color: '#8b5cf6',
+                url: 'https://chat.deepseek.com',
+                popupSize: {width: 1000, height: 700},
+                position: {left: 200, top: 150},
+                isOpen: false,
+                popup: null
+            },
+            {
+                id: 'gemini',
+                name: 'Gemini',
+                icon: 'fas fa-gem',
+                color: '#4285f4',
+                url: 'https://gemini.google.com',
+                popupSize: {width: 1000, height: 700},
+                position: {left: 300, top: 200},
+                isOpen: false,
+                popup: null
+            },
+            {
+                id: 'claude',
+                name: 'Claude',
+                icon: 'fas fa-cloud',
+                color: '#d946ef',
+                url: 'https://claude.ai',
+                popupSize: {width: 1000, height: 700},
+                position: {left: 400, top: 250},
+                isOpen: false,
+                popup: null
+            },
+            {
+                id: 'perplexity',
+                name: 'Perplexity',
+                icon: 'fas fa-search',
+                color: '#0d9488',
+                url: 'https://www.perplexity.ai',
+                popupSize: {width: 1000, height: 700},
+                position: {left: 500, top: 300},
+                isOpen: false,
+                popup: null
+            }
+        ];
+
+        // Current state
+        let currentUser = null;
+        let openPopups = [];
+        let popupCounter = 0;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', initApp);
+
+        function initApp() {
+            renderAIList();
+            mockLogin();
+            updateWindowsCounter();
+            
+            // Check for closed popups periodically
+            setInterval(checkPopupStatus, 1000);
+        }
+
+        // Render AI list
+        function renderAIList() {
+            const aiList = document.getElementById('aiList');
+            aiList.innerHTML = '';
+            
+            aiPlatforms.forEach(ai => {
+                const aiItem = document.createElement('div');
+                aiItem.className = `ai-item ${ai.isOpen ? 'active' : ''}`;
+                aiItem.dataset.aiId = ai.id;
+                aiItem.onclick = () => toggleAI(ai.id);
+                
+                aiItem.innerHTML = `
+                    <div class="ai-icon" style="background: ${ai.color}">
+                        <i class="${ai.icon}"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600;">${ai.name}</div>
+                        <div style="font-size: 0.8rem; color: var(--gray);">
+                            ${ai.isOpen ? 'Ochiq' : 'Yopiq'} • Popup oyna
+                        </div>
+                    </div>
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: ${ai.isOpen ? '#10b981' : '#ef4444'}"></div>
+                `;
+                
+                aiList.appendChild(aiItem);
+            });
+        }
+
+        // Toggle AI popup
+        function toggleAI(aiId) {
+            const ai = aiPlatforms.find(a => a.id === aiId);
+            if (!ai) return;
+            
+            if (ai.isOpen && ai.popup && !ai.popup.closed) {
+                focusPopup(ai);
+            } else {
+                openAIPopup(ai);
+            }
+        }
+
+        // Open AI in popup - ASOSIY FUNKSIYA
+        function openAIPopup(ai) {
+            // Calculate position
+            const left = ai.position.left + (popupCounter * 30);
+            const top = ai.position.top + (popupCounter * 30);
+            
+            // Open popup window
+            const popup = window.open(
+                ai.url,
+                `Aizet_${ai.name}_${Date.now()}`,
+                `width=${ai.popupSize.width},height=${ai.popupSize.height},
+                left=${left},top=${top},
+                toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`
+            );
+            
+            if (!popup) {
+                showNotification('Popup bloklangan! Brauzer sozlamalarini tekshiring.', 'error');
+                return;
+            }
+            
+            // Save popup reference
+            ai.popup = popup;
+            ai.isOpen = true;
+            ai.windowId = popupCounter++;
+            
+            // Add to open popups list
+            openPopups.push({
+                id: ai.id,
+                name: ai.name,
+                icon: ai.icon,
+                color: ai.color,
+                popup: popup,
+                windowId: ai.windowId
+            });
+            
+            // Update UI
+            updateDock();
+            updateWindowsCounter();
+            renderAIList();
+            
+            // Set up popup tracking
+            trackPopup(ai, popup);
+            
+            showNotification(`${ai.name} popup oynada ochildi`);
+        }
+
+        // Track popup status
+        function trackPopup(ai, popup) {
+            const checkInterval = setInterval(() => {
+                if (popup.closed) {
+                    clearInterval(checkInterval);
+                    ai.isOpen = false;
+                    ai.popup = null;
+                    
+                    // Remove from open popups
+                    openPopups = openPopups.filter(p => p.id !== ai.id);
+                    
+                    // Update UI
+                    updateDock();
+                    updateWindowsCounter();
+                    renderAIList();
+                    
+                    showNotification(`${ai.name} oynasi yopildi`);
+                }
+            }, 1000);
+        }
+
+        // Update dock system
+        function updateDock() {
+            const dock = document.getElementById('dockContainer');
+            dock.innerHTML = '';
+            
+            openPopups.forEach(popup => {
+                const dockItem = document.createElement('div');
+                dockItem.className = 'dock-item';
+                dockItem.style.background = popup.color;
+                dockItem.title = popup.name;
+                dockItem.onclick = () => focusPopupById(popup.id);
+                
+                dockItem.innerHTML = `
+                    <i class="${popup.icon}"></i>
+                `;
+                
+                dock.appendChild(dockItem);
+            });
+            
+            // Add control item
+            const controlItem = document.createElement('div');
+            controlItem.className = 'dock-item';
+            controlItem.style.background = 'var(--primary)';
+            controlItem.title = 'Boshqaruv paneli';
+            controlItem.onclick = showPopupManager;
+            controlItem.innerHTML = `<i class="fas fa-sliders-h"></i>`;
+            dock.appendChild(controlItem);
+        }
+
+        // Focus popup
+        function focusPopup(ai) {
+            if (ai.popup && !ai.popup.closed) {
+                ai.popup.focus();
+            }
+        }
+
+        function focusPopupById(aiId) {
+            const popupData = openPopups.find(p => p.id === aiId);
+            if (popupData && popupData.popup && !popupData.popup.closed) {
+                popupData.popup.focus();
+            }
+        }
+
+        // Check popup status
+        function checkPopupStatus() {
+            openPopups = openPopups.filter(popupData => {
+                if (popupData.popup.closed) {
+                    const ai = aiPlatforms.find(a => a.id === popupData.id);
+                    if (ai) {
+                        ai.isOpen = false;
+                        ai.popup = null;
+                    }
+                    return false;
+                }
+                return true;
+            });
+            
+            if (openPopups.length !== document.querySelectorAll('.dock-item').length - 1) {
+                updateDock();
+                updateWindowsCounter();
+                renderAIList();
+            }
+        }
+
+        // Update windows counter
+        function updateWindowsCounter() {
+            document.getElementById('openWindowsCount').textContent = openPopups.length;
+            document.getElementById('windowsCounter').style.display = openPopups.length > 0 ? 'flex' : 'none';
+        }
+
+        // Quick actions
+        function openAllAI() {
+            aiPlatforms.forEach(ai => {
+                if (!ai.isOpen) {
+                    setTimeout(() => openAIPopup(ai), 300);
+                }
+            });
+        }
+
+        function arrangePopups() {
+            openPopups.forEach((popupData, index) => {
+                if (popupData.popup && !popupData.popup.closed) {
+                    const left = 100 + (index * 30);
+                    const top = 100 + (index * 30);
+                    popupData.popup.moveTo(left, top);
+                    popupData.popup.resizeTo(1000, 700);
+                }
+            });
+            showNotification('Oynalar tartiblandi');
+        }
+
+        function closeAllPopups() {
+            if (openPopups.length === 0) return;
+            
+            if (confirm(`${openPopups.length} ta ochiq oynani yopmoqchimisiz?`)) {
+                openPopups.forEach(popupData => {
+                    if (popupData.popup && !popupData.popup.closed) {
+                        popupData.popup.close();
+                    }
+                });
+                
+                openPopups = [];
+                aiPlatforms.forEach(ai => {
+                    ai.isOpen = false;
+                    ai.popup = null;
+                });
+                
+                updateDock();
+                updateWindowsCounter();
+                renderAIList();
+                
+                showNotification('Barcha oynalar yopildi');
+            }
+        }
+
+        // Demo popup
+        function openDemoPopup() {
+            const demoPopup = window.open(
+                '',
+                'Demo_AI_Popup',
+                'width=800,height=600,left=200,top=150'
+            );
+            
+            if (demoPopup) {
+                demoPopup.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Demo AI Oynasi</title>
+                        <style>
+                            body {
+                                font-family: 'Segoe UI', sans-serif;
+                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                color: white;
+                                margin: 0;
+                                padding: 2rem;
+                            }
+                            .container {
+                                text-align: center;
+                                padding-top: 4rem;
+                            }
+                            h1 {
+                                margin-bottom: 2rem;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <h1>🎯 Demo AI Oynasi</h1>
+                            <p>Bu sizning Aizet platformangizdan ochilgan demo oyna</p>
+                            <p>Haqiqiy AI'lar ham shu tarzda ochiladi</p>
+                            <button onclick="window.close()" style="
+                                margin-top: 2rem;
+                                padding: 0.8rem 1.5rem;
+                                background: white;
+                                color: #667eea;
+                                border: none;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                font-weight: bold;
+                            ">
+                                Oynani yopish
+                            </button>
+                        </div>
+                    </body>
+                    </html>
+                `);
+                
+                // Add to tracking
+                const demoData = {
+                    id: 'demo',
+                    name: 'Demo',
+                    icon: 'fas fa-rocket',
+                    color: '#6366f1',
+                    popup: demoPopup,
+                    windowId: popupCounter++
+                };
+                
+                openPopups.push(demoData);
+                updateDock();
+                updateWindowsCounter();
+                
+                trackPopup({id: 'demo'}, demoPopup);
+            }
+        }
+
+        // Popup manager
+        function showPopupManager() {
+            const manager = window.open(
+                '',
+                'Popup_Manager',
+                'width=400,height=500,left=screen.width-450,top=100'
+            );
+            
+            if (manager) {
+                manager.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Popup Boshqaruvi</title>
+                        <style>
+                            body {
+                                font-family: 'Segoe UI', sans-serif;
+                                background: #0f172a;
+                                color: white;
+                                margin: 0;
+                                padding: 1rem;
+                            }
+                            .header {
+                                background: #1e293b;
+                                padding: 1rem;
+                                border-radius: 10px;
+                                margin-bottom: 1rem;
+                            }
+                            .popup-item {
+                                background: rgba(255,255,255,0.1);
+                                padding: 0.8rem;
+                                border-radius: 8px;
+                                margin-bottom: 0.5rem;
+                                display: flex;
+                                align-items: center;
+                                gap: 1rem;
+                            }
+                            .popup-actions {
+                                margin-left: auto;
+                                display: flex;
+                                gap: 0.5rem;
+                            }
+                            button {
+                                padding: 0.3rem 0.8rem;
+                                border: none;
+                                border-radius: 5px;
+                                cursor: pointer;
+                                font-size: 0.9rem;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h2>🪟 Oyna Boshqaruvi</h2>
+                            <p>Ochiq popup oynalar: ${openPopups.length}</p>
+                        </div>
+                        <div id="popupList"></div>
+                        <script>
+                            function updateList() {
+                                const list = document.getElementById('popupList');
+                                list.innerHTML = openPopups.map(p => \`
+                                    <div class="popup-item">
+                                        <i class="\${p.icon}"></i>
+                                        <span>\${p.name}</span>
+                                        <div class="popup-actions">
+                                            <button onclick="window.opener.focusPopupById('\${p.id}')" style="background: #10b981; color: white;">
+                                                Ko'rsatish
+                                            </button>
+                                            <button onclick="window.opener.closePopupById('\${p.id}')" style="background: #ef4444; color: white;">
+                                                Yopish
+                                            </button>
+                                        </div>
+                                    </div>
+                                \`).join('');
+                            }
+                            updateList();
+                            setInterval(updateList, 1000);
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+            }
+        }
+
+        function closePopupById(aiId) {
+            const popupData = openPopups.find(p => p.id === aiId);
+            if (popupData && popupData.popup && !popupData.popup.closed) {
+                popupData.popup.close();
+            }
+        }
+
+        // User auth
+        function toggleAuth() {
+            if (!currentUser) {
+                mockLogin();
+            } else {
+                logout();
+            }
+        }
+
+        function mockLogin() {
+            currentUser = {
+                name: 'Aizet Foydalanuvchi',
+                email: 'user@aizet.ai',
+                avatar: '👨‍💻'
+            };
+            
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userAvatar').textContent = currentUser.avatar;
+            document.getElementById('userStatus').textContent = 'Pro Account';
+            
+            showNotification(`Xush kelibsiz, ${currentUser.name}!`);
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('userName').textContent = 'Mehmon';
+            document.getElementById('userAvatar').textContent = '👤';
+            document.getElementById('userStatus').textContent = 'Kirish kerak';
+            
+            showNotification('Chiqildi. Mehmon rejimda ishlayapsiz.');
+        }
+
+        // Notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const text = document.getElementById('notificationText');
+            
+            notification.style.background = type === 'error' 
+                ? 'linear-gradient(45deg, #ef4444, #dc2626)' 
+                : 'var(--gradient)';
+            
+            text.textContent = message;
+            notification.style.display = 'flex';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
